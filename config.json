@@ -6,12 +6,11 @@
             //address: Ip address,0.0.0.0 by default
             "address": "0.0.0.0",
             //port: Port number
-            "port": 8080,
+            "port": 3000,
             //https: If true, use https for security,false by default
             "https": false
         }
     ],
-    /*
     "db_clients": [
         {
             //name: Name of the client,'default' by default
@@ -25,9 +24,9 @@
             //port: Server port, 5432 by default
             "port": 5432,
             //dbname: Database name
-            "dbname": "test",
+            "dbname": "realworld",
             //user: 'postgres' by default
-            "user": "",
+            "user": "postgres",
             //passwd: '' by default
             "passwd": "",
             //is_fast: false by default, if it is true, the client is faster but user can't call
@@ -37,7 +36,7 @@
             //connections per IO thread, otherwise it is the total number of all connections.
             "connection_number": 1
         }
-    ],*/
+    ],
     "app": {
         //threads_num: The number of IO threads, 1 by default, if the value is set to 0, the number of threads
         //is the number of CPU cores
@@ -110,9 +109,9 @@
         "load_dynamic_views": false,
         //dynamic_views_path: If the path isn't prefixed with /, ./ or ../,
         //it is relative path of document_root path
-        "dynamic_views_path": [
-            "./views"
-        ],
+//        "dynamic_views_path": [
+//            "./views"
+//        ],
         //dynamic_views_output_path: Default by an empty string which means the output path of source 
         //files is the path where the csp files locate. If the path isn't prefixed with /, it is relative 
         //path of the current working directory.
@@ -144,17 +143,17 @@
         //0 means cache forever, the negative value means no cache
         "static_files_cache_time": 5,
         //simple_controllers_map: Used to configure mapping from path to simple controller
-        "simple_controllers_map": [{
-            "path": "/path/name",
-            "controller": "controllerClassName",
-            "http_methods": [
-                "get",
-                "post"
-            ],
-            "filters": [
-                "FilterClassName"
-            ]
-        }],
+//        "simple_controllers_map": [{
+//            "path": "/path/name",
+//            "controller": "controllerClassName",
+//            "http_methods": [
+//                "get",
+//                "post"
+//            ],
+//            "filters": [
+//                "FilterClassName"
+//            ]
+//        }],
         //idle_connection_timeout: Defaults to 60 seconds, the lifetime 
         //of the connection without read or write
         "idle_connection_timeout": 60,

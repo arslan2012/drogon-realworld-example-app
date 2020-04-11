@@ -8,11 +8,11 @@
     //port: server port, 5432 by default;
     "port": 5432,
     //dbname: Database name;
-    "dbname": "",
+    "dbname": "realworld",
     //schema: valid for postgreSQL, "public" by default;
     "schema": "public",
     //user: User name
-    "user": "",
+    "user": "postgres",
     //passwd: Password
     "passwd": "",
     //table: An array of tables to be modelized. if the array is empty, all revealed tables are modelized.
