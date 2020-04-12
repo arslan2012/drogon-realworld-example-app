@@ -19,8 +19,8 @@ const bool Tags::hasPrimaryKey = true;
 const std::string Tags::tableName = "tags";
 
 const std::vector<typename Tags::MetaData> Tags::metaData_={
-{"id","std::string","character varying",255,0,1,1},
-{"name","std::string","character varying",255,0,0,0}
+{"id","int32_t","integer",4,1,1,1},
+{"name","std::string","character varying",0,0,0,0}
 };
 const std::string &Tags::getColumnName(size_t index) noexcept(false)
 {
@@ -33,7 +33,7 @@ Tags::Tags(const Row &r, const ssize_t indexOffset) noexcept
     {
         if(!r["id"].isNull())
         {
-            id_=std::make_shared<std::string>(r["id"].as<std::string>());
+            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
         }
         if(!r["name"].isNull())
         {
@@ -52,7 +52,7 @@ Tags::Tags(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 0;
         if(!r[index].isNull())
         {
-            id_=std::make_shared<std::string>(r[index].as<std::string>());
+            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
@@ -75,7 +75,7 @@ Tags::Tags(const Json::Value &pJson, const std::vector<std::string> &pMasqueradi
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -95,7 +95,7 @@ Tags::Tags(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[0]=true;
         if(!pJson["id"].isNull())
         {
-            id_=std::make_shared<std::string>(pJson["id"].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("name"))
@@ -120,7 +120,7 @@ void Tags::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -139,7 +139,7 @@ void Tags::updateByJson(const Json::Value &pJson) noexcept(false)
     {
         if(!pJson["id"].isNull())
         {
-            id_=std::make_shared<std::string>(pJson["id"].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("name"))
@@ -152,29 +152,17 @@ void Tags::updateByJson(const Json::Value &pJson) noexcept(false)
     }
 }
 
-const std::string &Tags::getValueOfId() const noexcept
+const int32_t &Tags::getValueOfId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(id_)
         return *id_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Tags::getId() const noexcept
+const std::shared_ptr<int32_t> &Tags::getId() const noexcept
 {
     return id_;
 }
-void Tags::setId(const std::string &pId) noexcept
-{
-    id_ = std::make_shared<std::string>(pId);
-    dirtyFlag_[0] = true;
-}
-void Tags::setId(std::string &&pId) noexcept
-{
-    id_ = std::make_shared<std::string>(std::move(pId));
-    dirtyFlag_[0] = true;
-}
-
-
 const typename Tags::PrimaryKeyType & Tags::getPrimaryKey() const
 {
     assert(id_);
@@ -217,7 +205,6 @@ void Tags::updateId(const uint64_t id)
 const std::vector<std::string> &Tags::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
-        "id",
         "name"
     };
     return inCols;
@@ -225,17 +212,6 @@ const std::vector<std::string> &Tags::insertColumns() noexcept
 
 void Tags::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[0])
-    {
-        if(getId())
-        {
-            binder << getValueOfId();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
     if(dirtyFlag_[1])
     {
         if(getName())
@@ -264,17 +240,6 @@ const std::vector<std::string> Tags::updateColumns() const
 
 void Tags::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[0])
-    {
-        if(getId())
-        {
-            binder << getValueOfId();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
     if(dirtyFlag_[1])
     {
         if(getName())
@@ -366,11 +331,6 @@ bool Tags::validateJsonForCreation(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
-    else
-    {
-        err="The id column cannot be null";
-        return false;
-    }
     if(pJson.isMember("name"))
     {
         if(!validJsonOfField(1, "name", pJson["name"], err, true))
@@ -393,11 +353,6 @@ bool Tags::validateMasqueradedJsonForCreation(const Json::Value &pJson,
         {
             if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, true))
                 return false;
-        }
-        else
-        {
-            err="The " + pMasqueradingVector[0] + " column cannot be null";
-            return false;
         }
     }
     if(!pMasqueradingVector[1].empty())
@@ -469,20 +424,16 @@ bool Tags::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isString())
+            if(isForCreation)
+            {
+                err="The automatic primary key cannot be set";
+                return false;
+            }        
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 1:
             if(pJson.isNull())
@@ -494,15 +445,6 @@ bool Tags::validJsonOfField(size_t index,
                 err="Type error in the "+fieldName+" field";
                 return false;                
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
      
         default:

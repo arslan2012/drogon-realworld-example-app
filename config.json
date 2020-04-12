@@ -31,10 +31,10 @@
             "passwd": "",
             //is_fast: false by default, if it is true, the client is faster but user can't call
             //any synchronous interface of it.
-            "is_fast": false,
+            "is_fast": true
             //connection_number: 1 by default, if the 'is_fast' is true, the number is the number of
             //connections per IO thread, otherwise it is the total number of all connections.
-            "connection_number": 1
+//            "connection_number": 1
         }
     ],
     "app": {
@@ -207,5 +207,9 @@
         }
     }],
     //custom_config: custom configuration for users. This object can be get by the app().getCustomConfig() method. 
-    "custom_config": {}
+    "custom_config": {
+        "image-default":"https://static.productionready.io/images/smiley-cyrus.jpg",
+        "jwt-secret":"nRvyYC4soFxBdZ-F-5Nnzz5USXstR1YylsTd-mA0aKtI9HUlriGrtkf-TiuDapkLiUCogO3JOK7kwZisrHp6wA",
+        "jwt-sessionTime":86400
+    }
 }

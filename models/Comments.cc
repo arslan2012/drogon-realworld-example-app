@@ -23,10 +23,10 @@ const bool Comments::hasPrimaryKey = true;
 const std::string Comments::tableName = "comments";
 
 const std::vector<typename Comments::MetaData> Comments::metaData_={
-{"id","std::string","character varying",255,0,1,1},
+{"id","int32_t","integer",4,1,1,1},
 {"body","std::string","text",0,0,0,0},
-{"article_id","std::string","character varying",255,0,0,0},
-{"user_id","std::string","character varying",255,0,0,0},
+{"article_id","std::string","character varying",0,0,0,0},
+{"user_id","std::string","character varying",0,0,0,0},
 {"created_at","::trantor::Date","timestamp without time zone",0,0,0,1},
 {"updated_at","::trantor::Date","timestamp without time zone",0,0,0,1}
 };
@@ -41,7 +41,7 @@ Comments::Comments(const Row &r, const ssize_t indexOffset) noexcept
     {
         if(!r["id"].isNull())
         {
-            id_=std::make_shared<std::string>(r["id"].as<std::string>());
+            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
         }
         if(!r["body"].isNull())
         {
@@ -106,7 +106,7 @@ Comments::Comments(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 0;
         if(!r[index].isNull())
         {
-            id_=std::make_shared<std::string>(r[index].as<std::string>());
+            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
@@ -179,7 +179,7 @@ Comments::Comments(const Json::Value &pJson, const std::vector<std::string> &pMa
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -261,7 +261,7 @@ Comments::Comments(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[0]=true;
         if(!pJson["id"].isNull())
         {
-            id_=std::make_shared<std::string>(pJson["id"].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("body"))
@@ -348,7 +348,7 @@ void Comments::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -429,7 +429,7 @@ void Comments::updateByJson(const Json::Value &pJson) noexcept(false)
     {
         if(!pJson["id"].isNull())
         {
-            id_=std::make_shared<std::string>(pJson["id"].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("body"))
@@ -504,29 +504,17 @@ void Comments::updateByJson(const Json::Value &pJson) noexcept(false)
     }
 }
 
-const std::string &Comments::getValueOfId() const noexcept
+const int32_t &Comments::getValueOfId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(id_)
         return *id_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Comments::getId() const noexcept
+const std::shared_ptr<int32_t> &Comments::getId() const noexcept
 {
     return id_;
 }
-void Comments::setId(const std::string &pId) noexcept
-{
-    id_ = std::make_shared<std::string>(pId);
-    dirtyFlag_[0] = true;
-}
-void Comments::setId(std::string &&pId) noexcept
-{
-    id_ = std::make_shared<std::string>(std::move(pId));
-    dirtyFlag_[0] = true;
-}
-
-
 const typename Comments::PrimaryKeyType & Comments::getPrimaryKey() const
 {
     assert(id_);
@@ -665,7 +653,6 @@ void Comments::updateId(const uint64_t id)
 const std::vector<std::string> &Comments::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
-        "id",
         "body",
         "article_id",
         "user_id",
@@ -677,17 +664,6 @@ const std::vector<std::string> &Comments::insertColumns() noexcept
 
 void Comments::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[0])
-    {
-        if(getId())
-        {
-            binder << getValueOfId();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
     if(dirtyFlag_[1])
     {
         if(getBody())
@@ -760,17 +736,6 @@ const std::vector<std::string> Comments::updateColumns() const
 
 void Comments::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[0])
-    {
-        if(getId())
-        {
-            binder << getValueOfId();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
     if(dirtyFlag_[1])
     {
         if(getBody())
@@ -1014,11 +979,6 @@ bool Comments::validateJsonForCreation(const Json::Value &pJson, std::string &er
         if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
-    else
-    {
-        err="The id column cannot be null";
-        return false;
-    }
     if(pJson.isMember("body"))
     {
         if(!validJsonOfField(1, "body", pJson["body"], err, true))
@@ -1066,11 +1026,6 @@ bool Comments::validateMasqueradedJsonForCreation(const Json::Value &pJson,
         {
             if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, true))
                 return false;
-        }
-        else
-        {
-            err="The " + pMasqueradingVector[0] + " column cannot be null";
-            return false;
         }
     }
     if(!pMasqueradingVector[1].empty())
@@ -1219,20 +1174,16 @@ bool Comments::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isString())
+            if(isForCreation)
+            {
+                err="The automatic primary key cannot be set";
+                return false;
+            }        
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 1:
             if(pJson.isNull())
@@ -1255,15 +1206,6 @@ bool Comments::validJsonOfField(size_t index,
                 err="Type error in the "+fieldName+" field";
                 return false;                
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 3:
             if(pJson.isNull())
@@ -1275,15 +1217,6 @@ bool Comments::validJsonOfField(size_t index,
                 err="Type error in the "+fieldName+" field";
                 return false;                
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 4:
             if(pJson.isNull())

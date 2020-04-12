@@ -19,8 +19,8 @@ const bool ArticleTags::hasPrimaryKey = false;
 const std::string ArticleTags::tableName = "article_tags";
 
 const std::vector<typename ArticleTags::MetaData> ArticleTags::metaData_={
-{"article_id","std::string","character varying",255,0,0,1},
-{"tag_id","std::string","character varying",255,0,0,1}
+{"article_id","std::string","character varying",0,0,0,1},
+{"tag_id","std::string","character varying",0,0,0,1}
 };
 const std::string &ArticleTags::getColumnName(size_t index) noexcept(false)
 {
@@ -466,15 +466,6 @@ bool ArticleTags::validJsonOfField(size_t index,
                 err="Type error in the "+fieldName+" field";
                 return false;                
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 1:
             if(pJson.isNull())
@@ -487,15 +478,6 @@ bool ArticleTags::validJsonOfField(size_t index,
                 err="Type error in the "+fieldName+" field";
                 return false;                
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
      
         default:

@@ -25,10 +25,10 @@ const bool Articles::hasPrimaryKey = true;
 const std::string Articles::tableName = "articles";
 
 const std::vector<typename Articles::MetaData> Articles::metaData_={
-{"id","std::string","character varying",255,0,1,1},
-{"user_id","std::string","character varying",255,0,0,0},
-{"slug","std::string","character varying",255,0,0,0},
-{"title","std::string","character varying",255,0,0,0},
+{"id","int32_t","integer",4,1,1,1},
+{"user_id","std::string","character varying",0,0,0,0},
+{"slug","std::string","character varying",0,0,0,0},
+{"title","std::string","character varying",0,0,0,0},
 {"description","std::string","text",0,0,0,0},
 {"body","std::string","text",0,0,0,0},
 {"created_at","::trantor::Date","timestamp without time zone",0,0,0,1},
@@ -45,7 +45,7 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
     {
         if(!r["id"].isNull())
         {
-            id_=std::make_shared<std::string>(r["id"].as<std::string>());
+            id_=std::make_shared<int32_t>(r["id"].as<int32_t>());
         }
         if(!r["user_id"].isNull())
         {
@@ -118,7 +118,7 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 0;
         if(!r[index].isNull())
         {
-            id_=std::make_shared<std::string>(r[index].as<std::string>());
+            id_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
@@ -201,7 +201,7 @@ Articles::Articles(const Json::Value &pJson, const std::vector<std::string> &pMa
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -299,7 +299,7 @@ Articles::Articles(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[0]=true;
         if(!pJson["id"].isNull())
         {
-            id_=std::make_shared<std::string>(pJson["id"].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("user_id"))
@@ -402,7 +402,7 @@ void Articles::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            id_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -499,7 +499,7 @@ void Articles::updateByJson(const Json::Value &pJson) noexcept(false)
     {
         if(!pJson["id"].isNull())
         {
-            id_=std::make_shared<std::string>(pJson["id"].asString());
+            id_=std::make_shared<int32_t>((int32_t)pJson["id"].asInt64());
         }
     }
     if(pJson.isMember("user_id"))
@@ -590,29 +590,17 @@ void Articles::updateByJson(const Json::Value &pJson) noexcept(false)
     }
 }
 
-const std::string &Articles::getValueOfId() const noexcept
+const int32_t &Articles::getValueOfId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(id_)
         return *id_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Articles::getId() const noexcept
+const std::shared_ptr<int32_t> &Articles::getId() const noexcept
 {
     return id_;
 }
-void Articles::setId(const std::string &pId) noexcept
-{
-    id_ = std::make_shared<std::string>(pId);
-    dirtyFlag_[0] = true;
-}
-void Articles::setId(std::string &&pId) noexcept
-{
-    id_ = std::make_shared<std::string>(std::move(pId));
-    dirtyFlag_[0] = true;
-}
-
-
 const typename Articles::PrimaryKeyType & Articles::getPrimaryKey() const
 {
     assert(id_);
@@ -809,7 +797,6 @@ void Articles::updateId(const uint64_t id)
 const std::vector<std::string> &Articles::insertColumns() noexcept
 {
     static const std::vector<std::string> inCols={
-        "id",
         "user_id",
         "slug",
         "title",
@@ -823,17 +810,6 @@ const std::vector<std::string> &Articles::insertColumns() noexcept
 
 void Articles::outputArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[0])
-    {
-        if(getId())
-        {
-            binder << getValueOfId();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
     if(dirtyFlag_[1])
     {
         if(getUserId())
@@ -928,17 +904,6 @@ const std::vector<std::string> Articles::updateColumns() const
 
 void Articles::updateArgs(drogon::orm::internal::SqlBinder &binder) const
 {
-    if(dirtyFlag_[0])
-    {
-        if(getId())
-        {
-            binder << getValueOfId();
-        }
-        else
-        {
-            binder << nullptr;
-        }
-    }
     if(dirtyFlag_[1])
     {
         if(getUserId())
@@ -1258,11 +1223,6 @@ bool Articles::validateJsonForCreation(const Json::Value &pJson, std::string &er
         if(!validJsonOfField(0, "id", pJson["id"], err, true))
             return false;
     }
-    else
-    {
-        err="The id column cannot be null";
-        return false;
-    }
     if(pJson.isMember("user_id"))
     {
         if(!validJsonOfField(1, "user_id", pJson["user_id"], err, true))
@@ -1320,11 +1280,6 @@ bool Articles::validateMasqueradedJsonForCreation(const Json::Value &pJson,
         {
             if(!validJsonOfField(0, pMasqueradingVector[0], pJson[pMasqueradingVector[0]], err, true))
                 return false;
-        }
-        else
-        {
-            err="The " + pMasqueradingVector[0] + " column cannot be null";
-            return false;
         }
     }
     if(!pMasqueradingVector[1].empty())
@@ -1509,20 +1464,16 @@ bool Articles::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isString())
+            if(isForCreation)
+            {
+                err="The automatic primary key cannot be set";
+                return false;
+            }        
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 1:
             if(pJson.isNull())
@@ -1534,15 +1485,6 @@ bool Articles::validJsonOfField(size_t index,
                 err="Type error in the "+fieldName+" field";
                 return false;                
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 2:
             if(pJson.isNull())
@@ -1554,15 +1496,6 @@ bool Articles::validJsonOfField(size_t index,
                 err="Type error in the "+fieldName+" field";
                 return false;                
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 3:
             if(pJson.isNull())
@@ -1574,15 +1507,6 @@ bool Articles::validJsonOfField(size_t index,
                 err="Type error in the "+fieldName+" field";
                 return false;                
             }
-            // asString().length() creates a string object, is there any better way to validate the length?
-            if(pJson.isString() && pJson.asString().length() > 255)
-            {
-                err="String length exceeds limit for the " +
-                    fieldName +
-                    " field (the maximum value is 255)";
-                return false;               
-            }
-
             break;
         case 4:
             if(pJson.isNull())
