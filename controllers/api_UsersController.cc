@@ -3,16 +3,20 @@
 #include <utils/jwtService.h>
 
 using namespace api;
-using namespace std;
 namespace drogon {
     template<>
     inline Users fromRequest(const HttpRequest &req) {
         auto json = req.getJsonObject();
         auto userJson = (*json)["user"];
         auto user = Users(userJson);
-        auto encryptedPass = BCrypt::generateHash(user.getValueOfPassword());
-        user.setPassword(encryptedPass);
         return user;
+    }
+
+    template<>
+    inline int fromRequest(const HttpRequest &req) {
+        auto token = req.getHeader("Authorization").substr(6);
+        LOG_DEBUG << token;
+        return jwtService::getUserIdFromJwt(token).value_or(0);
     }
 
 }
@@ -27,6 +31,8 @@ auto UsersController::newUser(Users &&pNewUser,
             return;
         }
         auto newUser = pNewUser;
+        auto encryptedPass = BCrypt::generateHash(newUser.getValueOfPassword());
+        newUser.setPassword(encryptedPass);
         newUser.setImage(app().getCustomConfig()["image-default"].asString());
         LOG_DEBUG << newUser.toJson().toStyledString();
         userMapper.insert(
@@ -66,6 +72,58 @@ auto UsersController::checkInputUser(const Users &user, const function<void(cons
                 callback(false);
             }
     );
+}
+
+auto UsersController::login(Users &&pNewUser, std::function<void(const HttpResponsePtr &)> &&callback) -> void {
+    userMapper.findOne(
+            Criteria(Users::Cols::_email, CompareOperator::EQ, pNewUser.getValueOfEmail()),
+            [=](const Users &user) {
+                if (BCrypt::validatePassword(pNewUser.getValueOfPassword(), user.getValueOfPassword())) {
+                    auto userWithToken = UsersController::UserWithToken(user);
+                    auto json = Json::Value();
+                    json["user"] = userWithToken.toJson();
+                    auto resp = HttpResponse::newHttpJsonResponse(json);
+                    callback(resp);
+                } else {
+                    auto resp = HttpResponse::newHttpResponse();
+                    resp->setStatusCode(HttpStatusCode::k401Unauthorized);
+                    callback(resp);
+                }
+            },
+            [callback](const DrogonDbException &e) {
+                LOG_ERROR << e.base().what();
+                auto resp = HttpResponse::newHttpResponse();
+                resp->setStatusCode(HttpStatusCode::k400BadRequest);
+                callback(resp);
+            }
+    );
+}
+
+auto
+UsersController::currentUser(int &&userId, std::function<void(const HttpResponsePtr &)> &&callback) -> void {
+    if (userId !=0 ) {
+        userMapper.findOne(
+                Criteria(Users::Cols::_id, CompareOperator::EQ, userId),
+                [=](const Users &user) {
+                    auto userWithToken = UsersController::UserWithToken(user);
+                    auto json = Json::Value();
+                    json["user"] = userWithToken.toJson();
+                    auto resp = HttpResponse::newHttpJsonResponse(json);
+                    callback(resp);
+                },
+                [callback](const DrogonDbException &e) {
+                    LOG_ERROR << e.base().what();
+                    auto resp = HttpResponse::newHttpResponse();
+                    resp->setStatusCode(HttpStatusCode::k400BadRequest);
+                    callback(resp);
+                }
+        );
+    } else {
+        auto resp = HttpResponse::newHttpResponse();
+        resp->setStatusCode(HttpStatusCode::k401Unauthorized);
+        callback(resp);
+    }
+
 }
 
 UsersController::UserWithToken::UserWithToken(const Users &user) {

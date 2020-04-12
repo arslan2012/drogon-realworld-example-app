@@ -10,8 +10,8 @@ auto jwtService::generateFromUser(Users user) -> string {
     return jwt::create()
             .set_issuer("auth0")
             .set_type("JWS")
-            .set_issued_at(std::chrono::system_clock::now())
-            .set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{duration})
+//            .set_issued_at(std::chrono::system_clock::now())
+//            .set_expires_at(std::chrono::system_clock::now() + std::chrono::seconds{duration})
             .set_payload_claim("user", jwt::claim(to_string(user.getValueOfId())))
             .sign(jwt::algorithm::hs256{secret});
 }
@@ -24,5 +24,5 @@ auto jwtService::getUserIdFromJwt(string token) -> optional<int> {
         LOG_ERROR << e.what();
         return nullopt;
     }
-    return decoded.get_payload_claim("user").as_int();
+    return stoi(decoded.get_payload_claim("user").as_string());
 }
