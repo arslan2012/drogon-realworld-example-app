@@ -11,14 +11,6 @@ namespace drogon {
         auto user = Users(userJson);
         return user;
     }
-
-    template<>
-    inline int fromRequest(const HttpRequest &req) {
-        auto token = req.getHeader("Authorization").substr(6);
-        LOG_DEBUG << token;
-        return jwtService::getUserIdFromJwt(token).value_or(0);
-    }
-
 }
 
 auto UsersController::newUser(Users &&pNewUser,
@@ -100,30 +92,59 @@ auto UsersController::login(Users &&pNewUser, std::function<void(const HttpRespo
 }
 
 auto
-UsersController::currentUser(int &&userId, std::function<void(const HttpResponsePtr &)> &&callback) -> void {
-    if (userId !=0 ) {
-        userMapper.findOne(
-                Criteria(Users::Cols::_id, CompareOperator::EQ, userId),
-                [=](const Users &user) {
-                    auto userWithToken = UsersController::UserWithToken(user);
-                    auto json = Json::Value();
-                    json["user"] = userWithToken.toJson();
-                    auto resp = HttpResponse::newHttpJsonResponse(json);
-                    callback(resp);
-                },
-                [callback](const DrogonDbException &e) {
-                    LOG_ERROR << e.base().what();
-                    auto resp = HttpResponse::newHttpResponse();
-                    resp->setStatusCode(HttpStatusCode::k400BadRequest);
-                    callback(resp);
-                }
-        );
-    } else {
-        auto resp = HttpResponse::newHttpResponse();
-        resp->setStatusCode(HttpStatusCode::k401Unauthorized);
-        callback(resp);
-    }
+UsersController::currentUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) -> void {
+    jwtService::getCurrentUserFromRequest(req, [callback](optional<Users> user) {
+        if (user.has_value()) {
+            auto userWithToken = UsersController::UserWithToken(user.value());
+            auto json = Json::Value();
+            json["user"] = userWithToken.toJson();
+            auto resp = HttpResponse::newHttpJsonResponse(json);
+            callback(resp);
+        } else {
+            auto resp = HttpResponse::newHttpResponse();
+            resp->setStatusCode(HttpStatusCode::k400BadRequest);
+            callback(resp);
+        }
+    });
+}
 
+auto UsersController::update(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback,
+                             Users &&pNewUser) -> void {
+    jwtService::getCurrentUserFromRequest(req, [=](optional<Users> user) {
+        if (user.has_value()) {
+            if (pNewUser.getEmail() != nullptr) {
+                user->setEmail(pNewUser.getValueOfEmail());
+            }
+            if (pNewUser.getUsername() != nullptr) {
+                user->setEmail(pNewUser.getValueOfUsername());
+            }
+            if (pNewUser.getPassword() != nullptr) {
+                user->setEmail(pNewUser.getValueOfPassword());
+            }
+            if (pNewUser.getBio() != nullptr) {
+                user->setEmail(pNewUser.getValueOfBio());
+            }
+            if (pNewUser.getImage() != nullptr) {
+                user->setEmail(pNewUser.getValueOfImage());
+            }
+            userMapper.update(user.value(), [callback, user](const size_t size) {
+                auto userWithToken = UsersController::UserWithToken(user.value());
+                auto json = Json::Value();
+                json["user"] = userWithToken.toJson();
+                auto resp = HttpResponse::newHttpJsonResponse(json);
+                callback(resp);
+            },[callback](const DrogonDbException &e) {
+                LOG_ERROR << e.base().what();
+                auto resp = HttpResponse::newHttpResponse();
+                resp->setStatusCode(HttpStatusCode::k400BadRequest);
+                callback(resp);
+            });
+        } else {
+            auto resp = HttpResponse::newHttpResponse();
+            resp->setStatusCode(HttpStatusCode::k400BadRequest);
+            callback(resp);
+        }
+    });
 }
 
 UsersController::UserWithToken::UserWithToken(const Users &user) {

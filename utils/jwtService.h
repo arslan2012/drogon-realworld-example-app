@@ -10,12 +10,19 @@
 #include <jwt-cpp/jwt.h>
 
 using namespace std;
+using namespace drogon;
 using namespace drogon_model::realworld;
 using namespace jwt;
+
 class jwtService {
 public:
-    static auto generateFromUser(Users user) -> string;
-    static auto getUserIdFromJwt(string token) -> optional<int>;
+    static auto generateFromUser(const Users& user) -> string;
+
+    static auto getUserIdFromJwt(const string& token) -> optional<int>;
+
+    static auto getCurrentUserIdFromRequest(const HttpRequestPtr &req) -> optional<int>;
+
+    static auto getCurrentUserFromRequest(const HttpRequestPtr &req, const function<void(optional<Users>)>& callback) -> void;
 
 private:
     static const string secret;

@@ -19,37 +19,88 @@
     "tables": [],
     "relationships": {
         "enabled": false,
-        "items": [{
-                "type": "has one",
-                "original_table_name": "products",
-                "original_table_alias": "product",
+        "items": [
+//            {
+//                "type": "has one",
+//                "original_table_name": "products",
+//                "original_table_alias": "product",
+//                "original_key": "id",
+//                "target_table_name": "skus",
+//                "target_table_alias": "SKU",
+//                "target_key": "product_id",
+//                "enable_reverse": true
+//            },
+            {
+                "type": "has many",
+                "original_table_name": "users",
+                "original_table_alias": "user",
                 "original_key": "id",
-                "target_table_name": "skus",
-                "target_table_alias": "SKU",
-                "target_key": "product_id",
+                "target_table_name": "comments",
+                "target_table_alias": "",
+                "target_key": "user_id",
                 "enable_reverse": true
             },
             {
                 "type": "has many",
-                "original_table_name": "products",
-                "original_table_alias": "product",
+                "original_table_name": "users",
+                "original_table_alias": "user",
                 "original_key": "id",
-                "target_table_name": "reviews",
+                "target_table_name": "articles",
                 "target_table_alias": "",
-                "target_key": "product_id",
+                "target_key": "user_id",
+                "enable_reverse": true
+            },
+            {
+                "type": "has many",
+                "original_table_name": "articles",
+                "original_table_alias": "article",
+                "original_key": "id",
+                "target_table_name": "comments",
+                "target_table_alias": "",
+                "target_key": "article_id",
                 "enable_reverse": true
             },
             {
                 "type": "many to many",
-                "original_table_name": "products",
+                "original_table_name": "users",
                 "original_table_alias": "",
                 "original_key": "id",
                 "pivot_table": {
-                    "table_name": "carts_products",
-                    "original_key": "product_id",
-                    "target_key": "cart_id"
+                    "table_name": "follows",
+                    "original_key": "user_id",
+                    "target_key": "follow_id"
                 },
-                "target_table_name": "carts",
+                "target_table_name": "users",
+                "target_table_alias": "",
+                "target_key": "id",
+                "enable_reverse": true
+            },
+            {
+                "type": "many to many",
+                "original_table_name": "articles",
+                "original_table_alias": "",
+                "original_key": "id",
+                "pivot_table": {
+                    "table_name": "article_favorites",
+                    "original_key": "article_id",
+                    "target_key": "user_id"
+                },
+                "target_table_name": "users",
+                "target_table_alias": "",
+                "target_key": "id",
+                "enable_reverse": true
+            },
+            {
+                "type": "many to many",
+                "original_table_name": "articles",
+                "original_table_alias": "",
+                "original_key": "id",
+                "pivot_table": {
+                    "table_name": "article_tags",
+                    "original_key": "article_id",
+                    "target_key": "tag_id"
+                },
+                "target_table_name": "tags",
                 "target_table_alias": "",
                 "target_key": "id",
                 "enable_reverse": true
@@ -73,7 +124,7 @@
             //name: Name of the client,'default' by default
             "name": "default",
             //is_fast: 
-            "is_fast": false
+            "is_fast": true
         },
         // directory: The directory where the controller source files are stored.
         "directory": "controllers",

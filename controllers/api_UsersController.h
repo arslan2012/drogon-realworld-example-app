@@ -12,7 +12,8 @@ namespace api {
         METHOD_LIST_BEGIN
             ADD_METHOD_TO(UsersController::newUser, "/users", Post);
             ADD_METHOD_TO(UsersController::login, "/users/login", Post);
-            ADD_METHOD_TO(UsersController::currentUser, "/user", Get);
+            ADD_METHOD_TO(UsersController::currentUser, "/user", Get, "LoginFilter");
+            ADD_METHOD_TO(UsersController::update, "/user", Put, "LoginFilter");
         METHOD_LIST_END
 
         auto newUser(Users &&pNewUser,
@@ -21,8 +22,9 @@ namespace api {
         auto login(Users &&pNewUser,
                    function<void(const HttpResponsePtr &)> &&callback) -> void;
 
-        auto currentUser(int &&userId,
+        auto currentUser(const HttpRequestPtr &req,
                          function<void(const HttpResponsePtr &)> &&callback) -> void;
+        auto update(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback, Users &&pNewUser) -> void;
     private:
         Mapper<Users> userMapper = Mapper<Users>(app().getFastDbClient());
         struct UserWithToken {
@@ -38,6 +40,5 @@ namespace api {
         };
 
         auto checkInputUser(const Users &user, const function<void(const bool)> &callback) -> void;
-
     };
 }
