@@ -18,6 +18,7 @@ const std::string Articles::Cols::_slug = "slug";
 const std::string Articles::Cols::_title = "title";
 const std::string Articles::Cols::_description = "description";
 const std::string Articles::Cols::_body = "body";
+const std::string Articles::Cols::_taglist = "taglist";
 const std::string Articles::Cols::_created_at = "created_at";
 const std::string Articles::Cols::_updated_at = "updated_at";
 const std::string Articles::primaryKeyName = "id";
@@ -26,11 +27,12 @@ const std::string Articles::tableName = "articles";
 
 const std::vector<typename Articles::MetaData> Articles::metaData_={
 {"id","int32_t","integer",4,1,1,1},
-{"user_id","std::string","character varying",0,0,0,0},
-{"slug","std::string","character varying",0,0,0,0},
-{"title","std::string","character varying",0,0,0,0},
+{"user_id","int32_t","integer",4,0,0,0},
+{"slug","std::string","text",0,0,0,0},
+{"title","std::string","text",0,0,0,0},
 {"description","std::string","text",0,0,0,0},
 {"body","std::string","text",0,0,0,0},
+{"taglist","std::vector<std::string>","text[]",0,0,0,0},
 {"created_at","::trantor::Date","timestamp without time zone",0,0,0,1},
 {"updated_at","::trantor::Date","timestamp without time zone",0,0,0,1}
 };
@@ -49,7 +51,7 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
         }
         if(!r["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(r["user_id"].as<std::string>());
+            userId_=std::make_shared<int32_t>(r["user_id"].as<int32_t>());
         }
         if(!r["slug"].isNull())
         {
@@ -66,6 +68,10 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
         if(!r["body"].isNull())
         {
             body_=std::make_shared<std::string>(r["body"].as<std::string>());
+        }
+        if(!r["taglist"].isNull())
+        {
+            taglist_=r["taglist"].asArray<std::string>();
         }
         if(!r["created_at"].isNull())
         {
@@ -109,7 +115,7 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
     else
     {
         size_t offset = (size_t)indexOffset;
-        if(offset + 8 > r.size())
+        if(offset + 9 > r.size())
         {
             LOG_FATAL << "Invalid SQL result for this model";
             return;
@@ -123,7 +129,7 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 1;
         if(!r[index].isNull())
         {
-            userId_=std::make_shared<std::string>(r[index].as<std::string>());
+            userId_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 2;
         if(!r[index].isNull())
@@ -148,6 +154,11 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 6;
         if(!r[index].isNull())
         {
+            taglist_=r[index].asArray<std::string>();
+        }
+        index = offset + 7;
+        if(!r[index].isNull())
+        {
             auto timeStr = r[index].as<std::string>();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
@@ -165,7 +176,7 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
             }
             createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
         }
-        index = offset + 7;
+        index = offset + 8;
         if(!r[index].isNull())
         {
             auto timeStr = r[index].as<std::string>();
@@ -191,7 +202,7 @@ Articles::Articles(const Row &r, const ssize_t indexOffset) noexcept
 
 Articles::Articles(const Json::Value &pJson, const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 9)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -209,7 +220,7 @@ Articles::Articles(const Json::Value &pJson, const std::vector<std::string> &pMa
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -247,9 +258,21 @@ Articles::Articles(const Json::Value &pJson, const std::vector<std::string> &pMa
     if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
     {
         dirtyFlag_[6] = true;
-        if(!pJson[pMasqueradingVector[6]].isNull())
+        if(!pJson[pMasqueradingVector[6]].isNull() && pJson[pMasqueradingVector[6]].isArray())
         {
-            auto timeStr = pJson[pMasqueradingVector[6]].asString();
+            taglist_=std::vector<std::shared_ptr<std::string>>();
+            for (const auto& el : pJson[pMasqueradingVector[6]])
+            {
+                taglist_.push_back(std::make_shared<std::string>(el.asString()));
+            }
+        }
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[7]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -267,12 +290,12 @@ Articles::Articles(const Json::Value &pJson, const std::vector<std::string> &pMa
             createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
         }
     }
-    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
     {
-        dirtyFlag_[7] = true;
-        if(!pJson[pMasqueradingVector[7]].isNull())
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[7]].asString();
+            auto timeStr = pJson[pMasqueradingVector[8]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -307,7 +330,7 @@ Articles::Articles(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[1]=true;
         if(!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson["user_id"].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
     if(pJson.isMember("slug"))
@@ -342,9 +365,21 @@ Articles::Articles(const Json::Value &pJson) noexcept(false)
             body_=std::make_shared<std::string>(pJson["body"].asString());
         }
     }
-    if(pJson.isMember("created_at"))
+    if(pJson.isMember("taglist"))
     {
         dirtyFlag_[6]=true;
+        if(!pJson["taglist"].isNull() && pJson["taglist"].isArray())
+        {
+            taglist_=std::vector<std::shared_ptr<std::string>>();
+            for (const auto& el : pJson["taglist"])
+            {
+                taglist_.push_back(std::make_shared<std::string>(el.asString()));
+            }
+        }
+    }
+    if(pJson.isMember("created_at"))
+    {
+        dirtyFlag_[7]=true;
         if(!pJson["created_at"].isNull())
         {
             auto timeStr = pJson["created_at"].asString();
@@ -367,7 +402,7 @@ Articles::Articles(const Json::Value &pJson) noexcept(false)
     }
     if(pJson.isMember("updated_at"))
     {
-        dirtyFlag_[7]=true;
+        dirtyFlag_[8]=true;
         if(!pJson["updated_at"].isNull())
         {
             auto timeStr = pJson["updated_at"].asString();
@@ -393,7 +428,7 @@ Articles::Articles(const Json::Value &pJson) noexcept(false)
 void Articles::updateByMasqueradedJson(const Json::Value &pJson,
                                             const std::vector<std::string> &pMasqueradingVector) noexcept(false)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 9)
     {
         LOG_ERROR << "Bad masquerading vector";
         return;
@@ -410,7 +445,7 @@ void Articles::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
     if(!pMasqueradingVector[2].empty() && pJson.isMember(pMasqueradingVector[2]))
@@ -448,9 +483,21 @@ void Articles::updateByMasqueradedJson(const Json::Value &pJson,
     if(!pMasqueradingVector[6].empty() && pJson.isMember(pMasqueradingVector[6]))
     {
         dirtyFlag_[6] = true;
-        if(!pJson[pMasqueradingVector[6]].isNull())
+        if(!pJson[pMasqueradingVector[6]].isNull() && pJson[pMasqueradingVector[6]].isArray())
         {
-            auto timeStr = pJson[pMasqueradingVector[6]].asString();
+            taglist_=std::vector<std::shared_ptr<std::string>>();
+            for (const auto& el : pJson[pMasqueradingVector[6]])
+            {
+                taglist_.push_back(std::make_shared<std::string>(el.asString()));
+            }
+        }
+    }
+    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    {
+        dirtyFlag_[7] = true;
+        if(!pJson[pMasqueradingVector[7]].isNull())
+        {
+            auto timeStr = pJson[pMasqueradingVector[7]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -468,12 +515,12 @@ void Articles::updateByMasqueradedJson(const Json::Value &pJson,
             createdAt_=std::make_shared<::trantor::Date>(t*1000000+decimalNum);
         }
     }
-    if(!pMasqueradingVector[7].empty() && pJson.isMember(pMasqueradingVector[7]))
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
     {
-        dirtyFlag_[7] = true;
-        if(!pJson[pMasqueradingVector[7]].isNull())
+        dirtyFlag_[8] = true;
+        if(!pJson[pMasqueradingVector[8]].isNull())
         {
-            auto timeStr = pJson[pMasqueradingVector[7]].asString();
+            auto timeStr = pJson[pMasqueradingVector[8]].asString();
             struct tm stm;
             memset(&stm,0,sizeof(stm));
             auto p = strptime(timeStr.c_str(),"%Y-%m-%d %H:%M:%S",&stm);
@@ -507,7 +554,7 @@ void Articles::updateByJson(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[1] = true;
         if(!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson["user_id"].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
     if(pJson.isMember("slug"))
@@ -542,9 +589,21 @@ void Articles::updateByJson(const Json::Value &pJson) noexcept(false)
             body_=std::make_shared<std::string>(pJson["body"].asString());
         }
     }
-    if(pJson.isMember("created_at"))
+    if(pJson.isMember("taglist"))
     {
         dirtyFlag_[6] = true;
+        if(!pJson["taglist"].isNull() && pJson["taglist"].isArray())
+        {
+            taglist_=std::vector<std::shared_ptr<std::string>>();
+            for (const auto& el : pJson["taglist"])
+            {
+                taglist_.push_back(std::make_shared<std::string>(el.asString()));
+            }
+        }
+    }
+    if(pJson.isMember("created_at"))
+    {
+        dirtyFlag_[7] = true;
         if(!pJson["created_at"].isNull())
         {
             auto timeStr = pJson["created_at"].asString();
@@ -567,7 +626,7 @@ void Articles::updateByJson(const Json::Value &pJson) noexcept(false)
     }
     if(pJson.isMember("updated_at"))
     {
-        dirtyFlag_[7] = true;
+        dirtyFlag_[8] = true;
         if(!pJson["updated_at"].isNull())
         {
             auto timeStr = pJson["updated_at"].asString();
@@ -607,25 +666,20 @@ const typename Articles::PrimaryKeyType & Articles::getPrimaryKey() const
     return *id_;
 }
 
-const std::string &Articles::getValueOfUserId() const noexcept
+const int32_t &Articles::getValueOfUserId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(userId_)
         return *userId_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Articles::getUserId() const noexcept
+const std::shared_ptr<int32_t> &Articles::getUserId() const noexcept
 {
     return userId_;
 }
-void Articles::setUserId(const std::string &pUserId) noexcept
+void Articles::setUserId(const int32_t &pUserId) noexcept
 {
-    userId_ = std::make_shared<std::string>(pUserId);
-    dirtyFlag_[1] = true;
-}
-void Articles::setUserId(std::string &&pUserId) noexcept
-{
-    userId_ = std::make_shared<std::string>(std::move(pUserId));
+    userId_ = std::make_shared<int32_t>(pUserId);
     dirtyFlag_[1] = true;
 }
 
@@ -752,6 +806,42 @@ void Articles::setBodyToNull() noexcept
     dirtyFlag_[5] = true;
 }
 
+const std::vector<std::string> &Articles::getValueOfTaglist() const noexcept
+{
+    const static std::string defaultValue = std::string();
+    static auto ret = std::vector<std::string>();
+    for (const auto& el: taglist_)
+    {
+        if(el)
+            ret.push_back(*el);
+        else
+            ret.push_back(defaultValue);
+    }
+
+    return ret;
+}
+const std::vector<std::shared_ptr<std::string>> &Articles::getTaglist() const noexcept
+{
+    return taglist_;
+}
+void Articles::setTaglist(const std::vector<std::string> &pTaglist) noexcept
+{
+    taglist_ = std::vector<std::shared_ptr<std::string>>();
+    for (const auto& el: pTaglist)
+    {
+        taglist_.push_back(std::make_shared<std::string>(el));
+    }
+
+    dirtyFlag_[6] = true;
+}
+
+
+void Articles::setTaglistToNull() noexcept
+{
+    taglist_.clear();
+    dirtyFlag_[6] = true;
+}
+
 const ::trantor::Date &Articles::getValueOfCreatedAt() const noexcept
 {
     const static ::trantor::Date defaultValue = ::trantor::Date();
@@ -766,7 +856,7 @@ const std::shared_ptr<::trantor::Date> &Articles::getCreatedAt() const noexcept
 void Articles::setCreatedAt(const ::trantor::Date &pCreatedAt) noexcept
 {
     createdAt_ = std::make_shared<::trantor::Date>(pCreatedAt);
-    dirtyFlag_[6] = true;
+    dirtyFlag_[7] = true;
 }
 
 
@@ -785,7 +875,7 @@ const std::shared_ptr<::trantor::Date> &Articles::getUpdatedAt() const noexcept
 void Articles::setUpdatedAt(const ::trantor::Date &pUpdatedAt) noexcept
 {
     updatedAt_ = std::make_shared<::trantor::Date>(pUpdatedAt);
-    dirtyFlag_[7] = true;
+    dirtyFlag_[8] = true;
 }
 
 
@@ -802,6 +892,7 @@ const std::vector<std::string> &Articles::insertColumns() noexcept
         "title",
         "description",
         "body",
+        "taglist",
         "created_at",
         "updated_at"
     };
@@ -867,6 +958,17 @@ void Articles::outputArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[6])
     {
+        if(!getTaglist().empty())
+        {
+            binder << getValueOfTaglist();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[7])
+    {
         if(getCreatedAt())
         {
             binder << getValueOfCreatedAt();
@@ -876,7 +978,7 @@ void Articles::outputArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[7])
+    if(dirtyFlag_[8])
     {
         if(getUpdatedAt())
         {
@@ -961,6 +1063,17 @@ void Articles::updateArgs(drogon::orm::internal::SqlBinder &binder) const
     }
     if(dirtyFlag_[6])
     {
+        if(!getTaglist().empty())
+        {
+            binder << getValueOfTaglist();
+        }
+        else
+        {
+            binder << nullptr;
+        }
+    }
+    if(dirtyFlag_[7])
+    {
         if(getCreatedAt())
         {
             binder << getValueOfCreatedAt();
@@ -970,7 +1083,7 @@ void Articles::updateArgs(drogon::orm::internal::SqlBinder &binder) const
             binder << nullptr;
         }
     }
-    if(dirtyFlag_[7])
+    if(dirtyFlag_[8])
     {
         if(getUpdatedAt())
         {
@@ -1033,6 +1146,17 @@ Json::Value Articles::toJson() const
     {
         ret["body"]=Json::Value();
     }
+    if(!getTaglist().empty())
+    {
+        for (int i = 0; i < getValueOfTaglist().size(); i++)
+        {
+            ret["taglist"][i] = getValueOfTaglist()[i];
+        }
+    }
+    else
+    {
+        ret["taglist"]=Json::Value();
+    }
     if(getCreatedAt())
     {
         ret["created_at"]=getCreatedAt()->toDbStringLocal();
@@ -1056,7 +1180,7 @@ Json::Value Articles::toMasqueradedJson(
     const std::vector<std::string> &pMasqueradingVector) const
 {
     Json::Value ret;
-    if(pMasqueradingVector.size() == 8)
+    if(pMasqueradingVector.size() == 9)
     {
         if(!pMasqueradingVector[0].empty())
         {
@@ -1126,9 +1250,12 @@ Json::Value Articles::toMasqueradedJson(
         }
         if(!pMasqueradingVector[6].empty())
         {
-            if(getCreatedAt())
+            if(!getTaglist().empty())
             {
-                ret[pMasqueradingVector[6]]=getCreatedAt()->toDbStringLocal();
+                for (int i = 0; i < getValueOfTaglist().size(); i++)
+                {
+                    ret["taglist"][i] = getValueOfTaglist()[i];
+                }
             }
             else
             {
@@ -1137,13 +1264,24 @@ Json::Value Articles::toMasqueradedJson(
         }
         if(!pMasqueradingVector[7].empty())
         {
-            if(getUpdatedAt())
+            if(getCreatedAt())
             {
-                ret[pMasqueradingVector[7]]=getUpdatedAt()->toDbStringLocal();
+                ret[pMasqueradingVector[7]]=getCreatedAt()->toDbStringLocal();
             }
             else
             {
                 ret[pMasqueradingVector[7]]=Json::Value();
+            }
+        }
+        if(!pMasqueradingVector[8].empty())
+        {
+            if(getUpdatedAt())
+            {
+                ret[pMasqueradingVector[8]]=getUpdatedAt()->toDbStringLocal();
+            }
+            else
+            {
+                ret[pMasqueradingVector[8]]=Json::Value();
             }
         }
         return ret;
@@ -1197,6 +1335,17 @@ Json::Value Articles::toMasqueradedJson(
     {
         ret["body"]=Json::Value();
     }
+    if(!getTaglist().empty())
+    {
+        for (int i = 0; i < getValueOfTaglist().size(); i++)
+        {
+            ret["taglist"][i] = getValueOfTaglist()[i];
+        }
+    }
+    else
+    {
+        ret["taglist"]=Json::Value();
+    }
     if(getCreatedAt())
     {
         ret["created_at"]=getCreatedAt()->toDbStringLocal();
@@ -1248,9 +1397,14 @@ bool Articles::validateJsonForCreation(const Json::Value &pJson, std::string &er
         if(!validJsonOfField(5, "body", pJson["body"], err, true))
             return false;
     }
+    if(pJson.isMember("taglist"))
+    {
+        if(!validJsonOfField(6, "taglist", pJson["taglist"], err, true))
+            return false;
+    }
     if(pJson.isMember("created_at"))
     {
-        if(!validJsonOfField(6, "created_at", pJson["created_at"], err, true))
+        if(!validJsonOfField(7, "created_at", pJson["created_at"], err, true))
             return false;
     }
     else
@@ -1260,7 +1414,7 @@ bool Articles::validateJsonForCreation(const Json::Value &pJson, std::string &er
     }
     if(pJson.isMember("updated_at"))
     {
-        if(!validJsonOfField(7, "updated_at", pJson["updated_at"], err, true))
+        if(!validJsonOfField(8, "updated_at", pJson["updated_at"], err, true))
             return false;
     }
     return true;
@@ -1269,7 +1423,7 @@ bool Articles::validateMasqueradedJsonForCreation(const Json::Value &pJson,
                                                   const std::vector<std::string> &pMasqueradingVector,
                                                   std::string &err)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 9)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1329,17 +1483,25 @@ bool Articles::validateMasqueradedJsonForCreation(const Json::Value &pJson,
             if(!validJsonOfField(6, pMasqueradingVector[6], pJson[pMasqueradingVector[6]], err, true))
                 return false;
         }
-        else
-        {
-            err="The " + pMasqueradingVector[6] + " column cannot be null";
-            return false;
-        }
     }
     if(!pMasqueradingVector[7].empty())
     {
         if(pJson.isMember(pMasqueradingVector[7]))
         {
             if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, true))
+                return false;
+        }
+        else
+        {
+            err="The " + pMasqueradingVector[7] + " column cannot be null";
+            return false;
+        }
+    }
+    if(!pMasqueradingVector[8].empty())
+    {
+        if(pJson.isMember(pMasqueradingVector[8]))
+        {
+            if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, true))
                 return false;
         }
     }
@@ -1382,14 +1544,19 @@ bool Articles::validateJsonForUpdate(const Json::Value &pJson, std::string &err)
         if(!validJsonOfField(5, "body", pJson["body"], err, false))
             return false;
     }
+    if(pJson.isMember("taglist"))
+    {
+        if(!validJsonOfField(6, "taglist", pJson["taglist"], err, false))
+            return false;
+    }
     if(pJson.isMember("created_at"))
     {
-        if(!validJsonOfField(6, "created_at", pJson["created_at"], err, false))
+        if(!validJsonOfField(7, "created_at", pJson["created_at"], err, false))
             return false;
     }
     if(pJson.isMember("updated_at"))
     {
-        if(!validJsonOfField(7, "updated_at", pJson["updated_at"], err, false))
+        if(!validJsonOfField(8, "updated_at", pJson["updated_at"], err, false))
             return false;
     }
     return true;
@@ -1398,7 +1565,7 @@ bool Articles::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
                                                 const std::vector<std::string> &pMasqueradingVector,
                                                 std::string &err)
 {
-    if(pMasqueradingVector.size() != 8)
+    if(pMasqueradingVector.size() != 9)
     {
         err = "Bad masquerading vector";
         return false;
@@ -1448,6 +1615,11 @@ bool Articles::validateMasqueradedJsonForUpdate(const Json::Value &pJson,
         if(!validJsonOfField(7, pMasqueradingVector[7], pJson[pMasqueradingVector[7]], err, false))
             return false;
     }
+    if(!pMasqueradingVector[8].empty() && pJson.isMember(pMasqueradingVector[8]))
+    {
+        if(!validJsonOfField(8, pMasqueradingVector[8], pJson[pMasqueradingVector[8]], err, false))
+            return false;
+    }
     return true;
 }
 bool Articles::validJsonOfField(size_t index,
@@ -1480,10 +1652,10 @@ bool Articles::validJsonOfField(size_t index,
             {
                 return true;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
             break;
         case 2:
@@ -1533,6 +1705,17 @@ bool Articles::validJsonOfField(size_t index,
         case 6:
             if(pJson.isNull())
             {
+                return true;
+            }
+            if(!pJson.isString())
+            {
+                err="Type error in the "+fieldName+" field";
+                return false;                
+            }
+            break;
+        case 7:
+            if(pJson.isNull())
+            {
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
@@ -1542,7 +1725,7 @@ bool Articles::validJsonOfField(size_t index,
                 return false;                
             }
             break;
-        case 7:
+        case 8:
             if(pJson.isNull())
             {
                 err="The " + fieldName + " column cannot be null";

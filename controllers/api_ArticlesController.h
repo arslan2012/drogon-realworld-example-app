@@ -19,8 +19,9 @@ namespace api {
                         function<void(const HttpResponsePtr &)> &&callback) -> void;
 
         auto getAllArticles(const HttpRequestPtr &req,
-                            function<void(const HttpResponsePtr &)> &&callback, const string& tag, const string& favorited,
-                            const string& author, int offset = 0, int limit = 0) -> void;
+                            function<void(const HttpResponsePtr &)> &&callback, const string &tag,
+                            const string &favorited,
+                            const string &author, int offset = 0, int limit = 0) -> void;
 
     private:
         Mapper<Articles> articleMapper = Mapper<Articles>(app().getFastDbClient());

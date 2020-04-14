@@ -15,11 +15,12 @@ namespace drogon {
 
 auto UsersController::newUser(Users &&pNewUser,
                               function<void(const HttpResponsePtr &)> &&callback) -> void {
+    auto callbackPtr = make_shared<function<void(const HttpResponsePtr &)>>(move(callback));
     checkInputUser(pNewUser, [=](const bool ifValid) {
         if (!ifValid) {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(HttpStatusCode::k400BadRequest);
-            callback(resp);
+            (*callbackPtr)(resp);
             return;
         }
         auto newUser = pNewUser;
@@ -29,19 +30,19 @@ auto UsersController::newUser(Users &&pNewUser,
         LOG_DEBUG << newUser.toJson().toStyledString();
         userMapper.insert(
                 newUser,
-                [callback](const Users &user) {
+                [callbackPtr](const Users &user) {
                     auto userWithToken = UsersController::UserWithToken(user);
                     auto json = Json::Value();
                     json["user"] = userWithToken.toJson();
                     auto resp = HttpResponse::newHttpJsonResponse(json);
                     resp->setStatusCode(HttpStatusCode::k201Created);
-                    callback(resp);
+                    (*callbackPtr)(resp);
                 },
-                [callback](const DrogonDbException &e) {
+                [callbackPtr](const DrogonDbException &e) {
                     LOG_ERROR << e.base().what();
                     auto resp = HttpResponse::newHttpResponse();
                     resp->setStatusCode(HttpStatusCode::k400BadRequest);
-                    callback(resp);
+                    (*callbackPtr)(resp);
                 }
         );
     });
@@ -51,22 +52,25 @@ auto UsersController::checkInputUser(const Users &user, const function<void(cons
     // check if missing field
     if (user.getEmail() == nullptr || user.getPassword() == nullptr || user.getUsername() == nullptr) {
         callback(false);
+        return;
     }
     // check if duplicate
+    auto callbackPtr = make_shared<function<void(const bool &)>>(callback);
     userMapper.findBy(
             Criteria(Users::Cols::_username, CompareOperator::EQ, user.getValueOfUsername()) ||
             Criteria(Users::Cols::_email, CompareOperator::EQ, user.getValueOfEmail()),
-            [callback](const vector<Users> &users) {
-                callback(users.empty());
+            [callbackPtr](const vector<Users> &users) {
+                (*callbackPtr)(users.empty());
             },
-            [callback](const DrogonDbException &e) {
+            [callbackPtr](const DrogonDbException &e) {
                 LOG_ERROR << e.base().what();
-                callback(false);
+                (*callbackPtr)(false);
             }
     );
 }
 
 auto UsersController::login(Users &&pNewUser, std::function<void(const HttpResponsePtr &)> &&callback) -> void {
+    auto callbackPtr = make_shared<function<void(const HttpResponsePtr &)>>(move(callback));
     userMapper.findOne(
             Criteria(Users::Cols::_email, CompareOperator::EQ, pNewUser.getValueOfEmail()),
             [=](const Users &user) {
@@ -75,41 +79,44 @@ auto UsersController::login(Users &&pNewUser, std::function<void(const HttpRespo
                     auto json = Json::Value();
                     json["user"] = userWithToken.toJson();
                     auto resp = HttpResponse::newHttpJsonResponse(json);
-                    callback(resp);
+                    (*callbackPtr)(resp);
                 } else {
                     auto resp = HttpResponse::newHttpResponse();
                     resp->setStatusCode(HttpStatusCode::k401Unauthorized);
-                    callback(resp);
+                    (*callbackPtr)(resp);
                 }
             },
-            [callback](const DrogonDbException &e) {
+            [callbackPtr](const DrogonDbException &e) {
                 LOG_ERROR << e.base().what();
                 auto resp = HttpResponse::newHttpResponse();
                 resp->setStatusCode(HttpStatusCode::k400BadRequest);
-                callback(resp);
+                (*callbackPtr)(resp);
             }
     );
 }
 
 auto
-UsersController::currentUser(const HttpRequestPtr &req, std::function<void(const HttpResponsePtr &)> &&callback) -> void {
-    jwtService::getCurrentUserFromRequest(req, [callback](optional<Users> user) {
+UsersController::currentUser(const HttpRequestPtr &req,
+                             std::function<void(const HttpResponsePtr &)> &&callback) -> void {
+    auto callbackPtr = make_shared<function<void(const HttpResponsePtr &)>>(move(callback));
+    jwtService::getCurrentUserFromRequest(req, [callbackPtr](optional<Users> user) {
         if (user.has_value()) {
             auto userWithToken = UsersController::UserWithToken(user.value());
             auto json = Json::Value();
             json["user"] = userWithToken.toJson();
             auto resp = HttpResponse::newHttpJsonResponse(json);
-            callback(resp);
+            (*callbackPtr)(resp);
         } else {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(HttpStatusCode::k400BadRequest);
-            callback(resp);
+            (*callbackPtr)(resp);
         }
     });
 }
 
 auto UsersController::update(const HttpRequestPtr &req, function<void(const HttpResponsePtr &)> &&callback,
                              Users &&pNewUser) -> void {
+    auto callbackPtr = make_shared<function<void(const HttpResponsePtr &)>>(move(callback));
     jwtService::getCurrentUserFromRequest(req, [=](optional<Users> user) {
         if (user.has_value()) {
             if (pNewUser.getEmail() != nullptr) {
@@ -127,22 +134,22 @@ auto UsersController::update(const HttpRequestPtr &req, function<void(const Http
             if (pNewUser.getImage() != nullptr) {
                 user->setEmail(pNewUser.getValueOfImage());
             }
-            userMapper.update(user.value(), [callback, user](const size_t size) {
+            userMapper.update(user.value(), [callbackPtr, user](const size_t size) {
                 auto userWithToken = UsersController::UserWithToken(user.value());
                 auto json = Json::Value();
                 json["user"] = userWithToken.toJson();
                 auto resp = HttpResponse::newHttpJsonResponse(json);
-                callback(resp);
-            },[callback](const DrogonDbException &e) {
+                (*callbackPtr)(resp);
+            }, [callbackPtr](const DrogonDbException &e) {
                 LOG_ERROR << e.base().what();
                 auto resp = HttpResponse::newHttpResponse();
                 resp->setStatusCode(HttpStatusCode::k400BadRequest);
-                callback(resp);
+                (*callbackPtr)(resp);
             });
         } else {
             auto resp = HttpResponse::newHttpResponse();
             resp->setStatusCode(HttpStatusCode::k400BadRequest);
-            callback(resp);
+            (*callbackPtr)(resp);
         }
     });
 }

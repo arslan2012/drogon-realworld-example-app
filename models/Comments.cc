@@ -25,8 +25,8 @@ const std::string Comments::tableName = "comments";
 const std::vector<typename Comments::MetaData> Comments::metaData_={
 {"id","int32_t","integer",4,1,1,1},
 {"body","std::string","text",0,0,0,0},
-{"article_id","std::string","character varying",0,0,0,0},
-{"user_id","std::string","character varying",0,0,0,0},
+{"article_id","int32_t","integer",4,0,0,0},
+{"user_id","int32_t","integer",4,0,0,0},
 {"created_at","::trantor::Date","timestamp without time zone",0,0,0,1},
 {"updated_at","::trantor::Date","timestamp without time zone",0,0,0,1}
 };
@@ -49,11 +49,11 @@ Comments::Comments(const Row &r, const ssize_t indexOffset) noexcept
         }
         if(!r["article_id"].isNull())
         {
-            articleId_=std::make_shared<std::string>(r["article_id"].as<std::string>());
+            articleId_=std::make_shared<int32_t>(r["article_id"].as<int32_t>());
         }
         if(!r["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(r["user_id"].as<std::string>());
+            userId_=std::make_shared<int32_t>(r["user_id"].as<int32_t>());
         }
         if(!r["created_at"].isNull())
         {
@@ -116,12 +116,12 @@ Comments::Comments(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 2;
         if(!r[index].isNull())
         {
-            articleId_=std::make_shared<std::string>(r[index].as<std::string>());
+            articleId_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 3;
         if(!r[index].isNull())
         {
-            userId_=std::make_shared<std::string>(r[index].as<std::string>());
+            userId_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 4;
         if(!r[index].isNull())
@@ -195,7 +195,7 @@ Comments::Comments(const Json::Value &pJson, const std::vector<std::string> &pMa
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            articleId_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            articleId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[2]].asInt64());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -203,7 +203,7 @@ Comments::Comments(const Json::Value &pJson, const std::vector<std::string> &pMa
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[3]].asInt64());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -277,7 +277,7 @@ Comments::Comments(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[2]=true;
         if(!pJson["article_id"].isNull())
         {
-            articleId_=std::make_shared<std::string>(pJson["article_id"].asString());
+            articleId_=std::make_shared<int32_t>((int32_t)pJson["article_id"].asInt64());
         }
     }
     if(pJson.isMember("user_id"))
@@ -285,7 +285,7 @@ Comments::Comments(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[3]=true;
         if(!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson["user_id"].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
     if(pJson.isMember("created_at"))
@@ -364,7 +364,7 @@ void Comments::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[2] = true;
         if(!pJson[pMasqueradingVector[2]].isNull())
         {
-            articleId_=std::make_shared<std::string>(pJson[pMasqueradingVector[2]].asString());
+            articleId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[2]].asInt64());
         }
     }
     if(!pMasqueradingVector[3].empty() && pJson.isMember(pMasqueradingVector[3]))
@@ -372,7 +372,7 @@ void Comments::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[3] = true;
         if(!pJson[pMasqueradingVector[3]].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson[pMasqueradingVector[3]].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[3]].asInt64());
         }
     }
     if(!pMasqueradingVector[4].empty() && pJson.isMember(pMasqueradingVector[4]))
@@ -445,7 +445,7 @@ void Comments::updateByJson(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[2] = true;
         if(!pJson["article_id"].isNull())
         {
-            articleId_=std::make_shared<std::string>(pJson["article_id"].asString());
+            articleId_=std::make_shared<int32_t>((int32_t)pJson["article_id"].asInt64());
         }
     }
     if(pJson.isMember("user_id"))
@@ -453,7 +453,7 @@ void Comments::updateByJson(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[3] = true;
         if(!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson["user_id"].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
     if(pJson.isMember("created_at"))
@@ -550,25 +550,20 @@ void Comments::setBodyToNull() noexcept
     dirtyFlag_[1] = true;
 }
 
-const std::string &Comments::getValueOfArticleId() const noexcept
+const int32_t &Comments::getValueOfArticleId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(articleId_)
         return *articleId_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Comments::getArticleId() const noexcept
+const std::shared_ptr<int32_t> &Comments::getArticleId() const noexcept
 {
     return articleId_;
 }
-void Comments::setArticleId(const std::string &pArticleId) noexcept
+void Comments::setArticleId(const int32_t &pArticleId) noexcept
 {
-    articleId_ = std::make_shared<std::string>(pArticleId);
-    dirtyFlag_[2] = true;
-}
-void Comments::setArticleId(std::string &&pArticleId) noexcept
-{
-    articleId_ = std::make_shared<std::string>(std::move(pArticleId));
+    articleId_ = std::make_shared<int32_t>(pArticleId);
     dirtyFlag_[2] = true;
 }
 
@@ -579,25 +574,20 @@ void Comments::setArticleIdToNull() noexcept
     dirtyFlag_[2] = true;
 }
 
-const std::string &Comments::getValueOfUserId() const noexcept
+const int32_t &Comments::getValueOfUserId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(userId_)
         return *userId_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Comments::getUserId() const noexcept
+const std::shared_ptr<int32_t> &Comments::getUserId() const noexcept
 {
     return userId_;
 }
-void Comments::setUserId(const std::string &pUserId) noexcept
+void Comments::setUserId(const int32_t &pUserId) noexcept
 {
-    userId_ = std::make_shared<std::string>(pUserId);
-    dirtyFlag_[3] = true;
-}
-void Comments::setUserId(std::string &&pUserId) noexcept
-{
-    userId_ = std::make_shared<std::string>(std::move(pUserId));
+    userId_ = std::make_shared<int32_t>(pUserId);
     dirtyFlag_[3] = true;
 }
 
@@ -1201,10 +1191,10 @@ bool Comments::validJsonOfField(size_t index,
             {
                 return true;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
             break;
         case 3:
@@ -1212,10 +1202,10 @@ bool Comments::validJsonOfField(size_t index,
             {
                 return true;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
             break;
         case 4:

@@ -19,8 +19,8 @@ const bool Follows::hasPrimaryKey = false;
 const std::string Follows::tableName = "follows";
 
 const std::vector<typename Follows::MetaData> Follows::metaData_={
-{"user_id","std::string","character varying",0,0,0,1},
-{"follow_id","std::string","character varying",0,0,0,1}
+{"user_id","int32_t","integer",4,0,0,1},
+{"follow_id","int32_t","integer",4,0,0,1}
 };
 const std::string &Follows::getColumnName(size_t index) noexcept(false)
 {
@@ -33,11 +33,11 @@ Follows::Follows(const Row &r, const ssize_t indexOffset) noexcept
     {
         if(!r["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(r["user_id"].as<std::string>());
+            userId_=std::make_shared<int32_t>(r["user_id"].as<int32_t>());
         }
         if(!r["follow_id"].isNull())
         {
-            followId_=std::make_shared<std::string>(r["follow_id"].as<std::string>());
+            followId_=std::make_shared<int32_t>(r["follow_id"].as<int32_t>());
         }
     }
     else
@@ -52,12 +52,12 @@ Follows::Follows(const Row &r, const ssize_t indexOffset) noexcept
         index = offset + 0;
         if(!r[index].isNull())
         {
-            userId_=std::make_shared<std::string>(r[index].as<std::string>());
+            userId_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
         {
-            followId_=std::make_shared<std::string>(r[index].as<std::string>());
+            followId_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
     }
 
@@ -75,7 +75,7 @@ Follows::Follows(const Json::Value &pJson, const std::vector<std::string> &pMasq
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -83,7 +83,7 @@ Follows::Follows(const Json::Value &pJson, const std::vector<std::string> &pMasq
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            followId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            followId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
 }
@@ -95,7 +95,7 @@ Follows::Follows(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[0]=true;
         if(!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson["user_id"].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
     if(pJson.isMember("follow_id"))
@@ -103,7 +103,7 @@ Follows::Follows(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[1]=true;
         if(!pJson["follow_id"].isNull())
         {
-            followId_=std::make_shared<std::string>(pJson["follow_id"].asString());
+            followId_=std::make_shared<int32_t>((int32_t)pJson["follow_id"].asInt64());
         }
     }
 }
@@ -121,7 +121,7 @@ void Follows::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -129,7 +129,7 @@ void Follows::updateByMasqueradedJson(const Json::Value &pJson,
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            followId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            followId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
 }
@@ -141,7 +141,7 @@ void Follows::updateByJson(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[0] = true;
         if(!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson["user_id"].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
     if(pJson.isMember("follow_id"))
@@ -149,54 +149,44 @@ void Follows::updateByJson(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[1] = true;
         if(!pJson["follow_id"].isNull())
         {
-            followId_=std::make_shared<std::string>(pJson["follow_id"].asString());
+            followId_=std::make_shared<int32_t>((int32_t)pJson["follow_id"].asInt64());
         }
     }
 }
 
-const std::string &Follows::getValueOfUserId() const noexcept
+const int32_t &Follows::getValueOfUserId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(userId_)
         return *userId_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Follows::getUserId() const noexcept
+const std::shared_ptr<int32_t> &Follows::getUserId() const noexcept
 {
     return userId_;
 }
-void Follows::setUserId(const std::string &pUserId) noexcept
+void Follows::setUserId(const int32_t &pUserId) noexcept
 {
-    userId_ = std::make_shared<std::string>(pUserId);
-    dirtyFlag_[0] = true;
-}
-void Follows::setUserId(std::string &&pUserId) noexcept
-{
-    userId_ = std::make_shared<std::string>(std::move(pUserId));
+    userId_ = std::make_shared<int32_t>(pUserId);
     dirtyFlag_[0] = true;
 }
 
 
 
-const std::string &Follows::getValueOfFollowId() const noexcept
+const int32_t &Follows::getValueOfFollowId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(followId_)
         return *followId_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &Follows::getFollowId() const noexcept
+const std::shared_ptr<int32_t> &Follows::getFollowId() const noexcept
 {
     return followId_;
 }
-void Follows::setFollowId(const std::string &pFollowId) noexcept
+void Follows::setFollowId(const int32_t &pFollowId) noexcept
 {
-    followId_ = std::make_shared<std::string>(pFollowId);
-    dirtyFlag_[1] = true;
-}
-void Follows::setFollowId(std::string &&pFollowId) noexcept
-{
-    followId_ = std::make_shared<std::string>(std::move(pFollowId));
+    followId_ = std::make_shared<int32_t>(pFollowId);
     dirtyFlag_[1] = true;
 }
 
@@ -461,10 +451,10 @@ bool Follows::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
             break;
         case 1:
@@ -473,10 +463,10 @@ bool Follows::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
             break;
      

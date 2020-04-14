@@ -48,7 +48,7 @@ class ArticleFavorites
     const static std::string tableName;
     const static bool hasPrimaryKey;
     const static std::vector<std::string> primaryKeyName;
-    using PrimaryKeyType = std::tuple<std::string,std::string>;//article_id,user_id
+    using PrimaryKeyType = std::tuple<int32_t,int32_t>;//article_id,user_id
     PrimaryKeyType getPrimaryKey() const; 
 
     /**
@@ -95,21 +95,19 @@ class ArticleFavorites
 
     /**  For column article_id  */
     ///Get the value of the column article_id, returns the default value if the column is null
-    const std::string &getValueOfArticleId() const noexcept;
+    const int32_t &getValueOfArticleId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getArticleId() const noexcept;
+    const std::shared_ptr<int32_t> &getArticleId() const noexcept;
     ///Set the value of the column article_id
-    void setArticleId(const std::string &pArticleId) noexcept;
-    void setArticleId(std::string &&pArticleId) noexcept;
+    void setArticleId(const int32_t &pArticleId) noexcept;
 
     /**  For column user_id  */
     ///Get the value of the column user_id, returns the default value if the column is null
-    const std::string &getValueOfUserId() const noexcept;
+    const int32_t &getValueOfUserId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getUserId() const noexcept;
+    const std::shared_ptr<int32_t> &getUserId() const noexcept;
     ///Set the value of the column user_id
-    void setUserId(const std::string &pUserId) noexcept;
-    void setUserId(std::string &&pUserId) noexcept;
+    void setUserId(const int32_t &pUserId) noexcept;
 
 
     static size_t getColumnNumber() noexcept {  return 2;  }
@@ -126,8 +124,8 @@ class ArticleFavorites
     void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
-    std::shared_ptr<std::string> articleId_;
-    std::shared_ptr<std::string> userId_;
+    std::shared_ptr<int32_t> articleId_;
+    std::shared_ptr<int32_t> userId_;
     struct MetaData
     {
         const std::string colName_;

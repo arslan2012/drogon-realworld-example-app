@@ -95,21 +95,19 @@ class Follows
 
     /**  For column user_id  */
     ///Get the value of the column user_id, returns the default value if the column is null
-    const std::string &getValueOfUserId() const noexcept;
+    const int32_t &getValueOfUserId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getUserId() const noexcept;
+    const std::shared_ptr<int32_t> &getUserId() const noexcept;
     ///Set the value of the column user_id
-    void setUserId(const std::string &pUserId) noexcept;
-    void setUserId(std::string &&pUserId) noexcept;
+    void setUserId(const int32_t &pUserId) noexcept;
 
     /**  For column follow_id  */
     ///Get the value of the column follow_id, returns the default value if the column is null
-    const std::string &getValueOfFollowId() const noexcept;
+    const int32_t &getValueOfFollowId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getFollowId() const noexcept;
+    const std::shared_ptr<int32_t> &getFollowId() const noexcept;
     ///Set the value of the column follow_id
-    void setFollowId(const std::string &pFollowId) noexcept;
-    void setFollowId(std::string &&pFollowId) noexcept;
+    void setFollowId(const int32_t &pFollowId) noexcept;
 
 
     static size_t getColumnNumber() noexcept {  return 2;  }
@@ -126,8 +124,8 @@ class Follows
     void updateArgs(drogon::orm::internal::SqlBinder &binder) const;
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
-    std::shared_ptr<std::string> userId_;
-    std::shared_ptr<std::string> followId_;
+    std::shared_ptr<int32_t> userId_;
+    std::shared_ptr<int32_t> followId_;
     struct MetaData
     {
         const std::string colName_;

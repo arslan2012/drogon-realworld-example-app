@@ -24,11 +24,11 @@ const std::string Users::tableName = "users";
 
 const std::vector<typename Users::MetaData> Users::metaData_={
 {"id","int32_t","integer",4,1,1,1},
-{"username","std::string","character varying",0,0,0,0},
-{"password","std::string","character varying",0,0,0,0},
-{"email","std::string","character varying",0,0,0,0},
+{"username","std::string","text",0,0,0,0},
+{"password","std::string","text",0,0,0,0},
+{"email","std::string","text",0,0,0,0},
 {"bio","std::string","text",0,0,0,0},
-{"image","std::string","character varying",0,0,0,0}
+{"image","std::string","text",0,0,0,0}
 };
 const std::string &Users::getColumnName(size_t index) noexcept(false)
 {

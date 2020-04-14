@@ -19,8 +19,8 @@ const bool ArticleFavorites::hasPrimaryKey = true;
 const std::string ArticleFavorites::tableName = "article_favorites";
 
 const std::vector<typename ArticleFavorites::MetaData> ArticleFavorites::metaData_={
-{"article_id","std::string","character varying",0,0,1,1},
-{"user_id","std::string","character varying",0,0,1,1}
+{"article_id","int32_t","integer",4,0,1,1},
+{"user_id","int32_t","integer",4,0,1,1}
 };
 const std::string &ArticleFavorites::getColumnName(size_t index) noexcept(false)
 {
@@ -33,11 +33,11 @@ ArticleFavorites::ArticleFavorites(const Row &r, const ssize_t indexOffset) noex
     {
         if(!r["article_id"].isNull())
         {
-            articleId_=std::make_shared<std::string>(r["article_id"].as<std::string>());
+            articleId_=std::make_shared<int32_t>(r["article_id"].as<int32_t>());
         }
         if(!r["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(r["user_id"].as<std::string>());
+            userId_=std::make_shared<int32_t>(r["user_id"].as<int32_t>());
         }
     }
     else
@@ -52,12 +52,12 @@ ArticleFavorites::ArticleFavorites(const Row &r, const ssize_t indexOffset) noex
         index = offset + 0;
         if(!r[index].isNull())
         {
-            articleId_=std::make_shared<std::string>(r[index].as<std::string>());
+            articleId_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
         index = offset + 1;
         if(!r[index].isNull())
         {
-            userId_=std::make_shared<std::string>(r[index].as<std::string>());
+            userId_=std::make_shared<int32_t>(r[index].as<int32_t>());
         }
     }
 
@@ -75,7 +75,7 @@ ArticleFavorites::ArticleFavorites(const Json::Value &pJson, const std::vector<s
         dirtyFlag_[0] = true;
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            articleId_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            articleId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
@@ -83,7 +83,7 @@ ArticleFavorites::ArticleFavorites(const Json::Value &pJson, const std::vector<s
         dirtyFlag_[1] = true;
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
 }
@@ -95,7 +95,7 @@ ArticleFavorites::ArticleFavorites(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[0]=true;
         if(!pJson["article_id"].isNull())
         {
-            articleId_=std::make_shared<std::string>(pJson["article_id"].asString());
+            articleId_=std::make_shared<int32_t>((int32_t)pJson["article_id"].asInt64());
         }
     }
     if(pJson.isMember("user_id"))
@@ -103,7 +103,7 @@ ArticleFavorites::ArticleFavorites(const Json::Value &pJson) noexcept(false)
         dirtyFlag_[1]=true;
         if(!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson["user_id"].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
 }
@@ -120,14 +120,14 @@ void ArticleFavorites::updateByMasqueradedJson(const Json::Value &pJson,
     {
         if(!pJson[pMasqueradingVector[0]].isNull())
         {
-            articleId_=std::make_shared<std::string>(pJson[pMasqueradingVector[0]].asString());
+            articleId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[0]].asInt64());
         }
     }
     if(!pMasqueradingVector[1].empty() && pJson.isMember(pMasqueradingVector[1]))
     {
         if(!pJson[pMasqueradingVector[1]].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson[pMasqueradingVector[1]].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson[pMasqueradingVector[1]].asInt64());
         }
     }
 }
@@ -138,61 +138,51 @@ void ArticleFavorites::updateByJson(const Json::Value &pJson) noexcept(false)
     {
         if(!pJson["article_id"].isNull())
         {
-            articleId_=std::make_shared<std::string>(pJson["article_id"].asString());
+            articleId_=std::make_shared<int32_t>((int32_t)pJson["article_id"].asInt64());
         }
     }
     if(pJson.isMember("user_id"))
     {
         if(!pJson["user_id"].isNull())
         {
-            userId_=std::make_shared<std::string>(pJson["user_id"].asString());
+            userId_=std::make_shared<int32_t>((int32_t)pJson["user_id"].asInt64());
         }
     }
 }
 
-const std::string &ArticleFavorites::getValueOfArticleId() const noexcept
+const int32_t &ArticleFavorites::getValueOfArticleId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(articleId_)
         return *articleId_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &ArticleFavorites::getArticleId() const noexcept
+const std::shared_ptr<int32_t> &ArticleFavorites::getArticleId() const noexcept
 {
     return articleId_;
 }
-void ArticleFavorites::setArticleId(const std::string &pArticleId) noexcept
+void ArticleFavorites::setArticleId(const int32_t &pArticleId) noexcept
 {
-    articleId_ = std::make_shared<std::string>(pArticleId);
-    dirtyFlag_[0] = true;
-}
-void ArticleFavorites::setArticleId(std::string &&pArticleId) noexcept
-{
-    articleId_ = std::make_shared<std::string>(std::move(pArticleId));
+    articleId_ = std::make_shared<int32_t>(pArticleId);
     dirtyFlag_[0] = true;
 }
 
 
 
-const std::string &ArticleFavorites::getValueOfUserId() const noexcept
+const int32_t &ArticleFavorites::getValueOfUserId() const noexcept
 {
-    const static std::string defaultValue = std::string();
+    const static int32_t defaultValue = int32_t();
     if(userId_)
         return *userId_;
     return defaultValue;
 }
-const std::shared_ptr<std::string> &ArticleFavorites::getUserId() const noexcept
+const std::shared_ptr<int32_t> &ArticleFavorites::getUserId() const noexcept
 {
     return userId_;
 }
-void ArticleFavorites::setUserId(const std::string &pUserId) noexcept
+void ArticleFavorites::setUserId(const int32_t &pUserId) noexcept
 {
-    userId_ = std::make_shared<std::string>(pUserId);
-    dirtyFlag_[1] = true;
-}
-void ArticleFavorites::setUserId(std::string &&pUserId) noexcept
-{
-    userId_ = std::make_shared<std::string>(std::move(pUserId));
+    userId_ = std::make_shared<int32_t>(pUserId);
     dirtyFlag_[1] = true;
 }
 
@@ -481,10 +471,10 @@ bool ArticleFavorites::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
             break;
         case 1:
@@ -493,10 +483,10 @@ bool ArticleFavorites::validJsonOfField(size_t index,
                 err="The " + fieldName + " column cannot be null";
                 return false;
             }
-            if(!pJson.isString())
+            if(!pJson.isInt())
             {
                 err="Type error in the "+fieldName+" field";
-                return false;                
+                return false;
             }
             break;
      

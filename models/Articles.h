@@ -46,6 +46,7 @@ class Articles
         static const std::string _title;
         static const std::string _description;
         static const std::string _body;
+        static const std::string _taglist;
         static const std::string _created_at;
         static const std::string _updated_at;
     };
@@ -107,12 +108,11 @@ class Articles
 
     /**  For column user_id  */
     ///Get the value of the column user_id, returns the default value if the column is null
-    const std::string &getValueOfUserId() const noexcept;
+    const int32_t &getValueOfUserId() const noexcept;
     ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
-    const std::shared_ptr<std::string> &getUserId() const noexcept;
+    const std::shared_ptr<int32_t> &getUserId() const noexcept;
     ///Set the value of the column user_id
-    void setUserId(const std::string &pUserId) noexcept;
-    void setUserId(std::string &&pUserId) noexcept;
+    void setUserId(const int32_t &pUserId) noexcept;
     void setUserIdToNull() noexcept;
 
     /**  For column slug  */
@@ -155,6 +155,15 @@ class Articles
     void setBody(std::string &&pBody) noexcept;
     void setBodyToNull() noexcept;
 
+    /**  For column taglist  */
+    ///Get the value of the column taglist, returns the default value if the column is null
+    const std::vector<std::string> &getValueOfTaglist() const noexcept;
+    ///Return a shared_ptr object pointing to the column const value, or an empty shared_ptr object if the column is null
+    const std::vector<std::shared_ptr<std::string>> &getTaglist() const noexcept;
+    ///Set the value of the column taglist
+    void setTaglist(const std::vector<std::string> &pTaglist) noexcept;
+    void setTaglistToNull() noexcept;
+
     /**  For column created_at  */
     ///Get the value of the column created_at, returns the default value if the column is null
     const ::trantor::Date &getValueOfCreatedAt() const noexcept;
@@ -172,7 +181,7 @@ class Articles
     void setUpdatedAt(const ::trantor::Date &pUpdatedAt) noexcept;
 
 
-    static size_t getColumnNumber() noexcept {  return 8;  }
+    static size_t getColumnNumber() noexcept {  return 9;  }
     static const std::string &getColumnName(size_t index) noexcept(false);
 
     Json::Value toJson() const;
@@ -187,11 +196,12 @@ class Articles
     ///For mysql or sqlite3
     void updateId(const uint64_t id);
     std::shared_ptr<int32_t> id_;
-    std::shared_ptr<std::string> userId_;
+    std::shared_ptr<int32_t> userId_;
     std::shared_ptr<std::string> slug_;
     std::shared_ptr<std::string> title_;
     std::shared_ptr<std::string> description_;
     std::shared_ptr<std::string> body_;
+    std::vector<std::shared_ptr<std::string>> taglist_;
     std::shared_ptr<::trantor::Date> createdAt_;
     std::shared_ptr<::trantor::Date> updatedAt_;
     struct MetaData
@@ -205,7 +215,7 @@ class Articles
         const bool notNull_;
     };
     static const std::vector<MetaData> metaData_;
-    bool dirtyFlag_[8]={ false };
+    bool dirtyFlag_[9]={ false };
   public:
     static const std::string &sqlForFindingByPrimaryKey()
     {
@@ -252,12 +262,17 @@ class Articles
         }
         if(dirtyFlag_[6])
         {
+            sql += "taglist,";
+            ++parametersCount;
+        }
+        if(dirtyFlag_[7])
+        {
             sql += "created_at,";
             ++parametersCount;
         }
         sql += "updated_at,";
         ++parametersCount;
-        if(!dirtyFlag_[7])
+        if(!dirtyFlag_[8])
         {
             needSelection=true;
         }
@@ -305,6 +320,11 @@ class Articles
             sql.append(placeholderStr, n);
         } 
         if(dirtyFlag_[7])
+        {
+            n = sprintf(placeholderStr,"$%d,",placeholder++);
+            sql.append(placeholderStr, n);
+        } 
+        if(dirtyFlag_[8])
         {
             n = sprintf(placeholderStr,"$%d,",placeholder++);
             sql.append(placeholderStr, n);
