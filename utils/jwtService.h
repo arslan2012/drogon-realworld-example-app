@@ -27,7 +27,7 @@ public:
 private:
     static const string secret;
     static const int duration;
-    static const verifier<default_clock> _verifier;
+    static const verifier<default_clock, picojson_traits> _verifier;
 };
 
 #endif //ARSLANTECH_JWTSERVICE_H
