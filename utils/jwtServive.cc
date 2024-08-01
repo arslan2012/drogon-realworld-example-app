@@ -28,7 +28,7 @@ auto jwtService::getUserIdFromJwt(const string& token) -> optional<int> {
 }
 
 auto jwtService::getCurrentUserIdFromRequest(const HttpRequestPtr &req) -> optional<int> {
-    auto token = req->getHeader("Authorization").substr(6);
+    auto token = req->getHeader("Authorization").substr(7);
     return getUserIdFromJwt(token);
 }
 
